@@ -77,6 +77,7 @@ const putApi = async (data, route) => {
         }
       }
     }
+    
 
     // Log formData entries for debugging
     for (let [key, value] of formData.entries()) {

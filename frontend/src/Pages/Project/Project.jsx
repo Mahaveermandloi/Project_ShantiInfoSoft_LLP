@@ -4,9 +4,13 @@ import NoteAddIcon from "@mui/icons-material/NoteAdd";
 import { FaEllipsisH } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { getApi } from "../../Utils/API";
+import Pagination from "../../Components/Pagination";
+import { Svg } from "../../Components/Svg"; // Adjust the import path as needed
 
 const Project = () => {
   const [projects, setProjects] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const projectsPerPage = 5;
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -14,10 +18,8 @@ const Project = () => {
       try {
         const url = "/api/project/get-projects";
         const response = await getApi(url);
-        console.log("help help help");
         if (response) {
-          setProjects(response.data.data); // Assuming response.data is an array of projects
-
+          setProjects(response.data.data);
           console.log("Projects fetched successfully:", response.data.data);
         } else {
           console.error("Failed to fetch projects:", response.message);
@@ -29,6 +31,19 @@ const Project = () => {
 
     fetchData();
   }, []);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const indexOfLastProject = currentPage * projectsPerPage;
+  const indexOfFirstProject = indexOfLastProject - projectsPerPage;
+  const currentProjects = projects.slice(
+    indexOfFirstProject,
+    indexOfLastProject
+  );
+
+  const totalPages = Math.ceil(projects.length / projectsPerPage);
 
   const tableHeaders = [
     "Project Name",
@@ -69,7 +84,6 @@ const Project = () => {
 
       <div>
         <div className="relative mt-5 overflow-x-auto shadow-md sm:rounded-lg">
-          {/* TABLE */}
           <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
             <thead className="text-base text-black bg-gray-50 dark:text-gray-400">
               <tr>
@@ -87,14 +101,14 @@ const Project = () => {
             </thead>
 
             <tbody>
-              {projects.length === 0 ? (
+              {currentProjects.length === 0 ? (
                 <tr>
                   <td colSpan={tableHeaders.length} className="text-center p-4">
                     No Projects Found
                   </td>
                 </tr>
               ) : (
-                projects.map((project, index) => (
+                currentProjects.map((project, index) => (
                   <tr className="bg-white border-b" key={index}>
                     <th
                       scope="row"
@@ -120,22 +134,14 @@ const Project = () => {
           </table>
         </div>
       </div>
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
     </div>
   );
 };
 
 export default Project;
-
-const Svg = () => {
-  return (
-    <svg
-      className="w-3 h-3 ms-1.5"
-      aria-hidden="true"
-      xmlns="http://www.w3.org/2000/svg"
-      fill="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <path d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z" />
-    </svg>
-  );
-};

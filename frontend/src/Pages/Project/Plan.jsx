@@ -4,6 +4,7 @@ import { FaEllipsisH } from "react-icons/fa";
 import NoteAddIcon from "@mui/icons-material/NoteAdd";
 import { CiSearch } from "react-icons/ci";
 import { getApi } from "../../Utils/API.js";
+import Pagination from "../../Components/Pagination.jsx";
 
 const Plan = () => {
   const { id } = useParams();
@@ -63,7 +64,7 @@ const Plan = () => {
         <div className="flex items-center lg:justify-end">
           <div className="flex flex-col items-center lg:flex-row lg:space-x-5 space-y-2">
             <div>
-              <select className=" bg-gray-100 lg:w-40 mt-2 w-[350px] lg:p-0  h-10 p-2 rounded-md">
+              <select className=" bg-gray-100 lg:w-40 lg:mt-2 w-[350px] lg:p-0  h-10 p-2 rounded-md">
                 <option value="" className="text-gray-400  ">
                   Sort By
                 </option>
@@ -77,7 +78,7 @@ const Plan = () => {
               <input
                 type="text"
                 placeholder="Search"
-                className="p-2 bg-gray-100 w-[250px] rounded-l-md"
+                className="p-2 bg-gray-100 lg:w-[250px] w-[310px] rounded-l-md"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -150,50 +151,11 @@ const Plan = () => {
         </div>
 
         {/* Pagination */}
-        <nav className="mt-4 flex justify-center" aria-label="Page navigation">
-          <ul className="inline-flex space-x-2">
-            <li>
-              <button
-                className={`px-3 py-2 bg-gray-200 rounded-md text-gray-700 ${
-                  currentPage === 1
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-gray-300"
-                }`}
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-              >
-                Previous
-              </button>
-            </li>
-            {Array.from({ length: totalPages }, (_, index) => (
-              <li key={index}>
-                <button
-                  className={`px-3 py-2 rounded-md ${
-                    index + 1 === currentPage
-                      ? "bg-[#ee4f50] text-white"
-                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                  }`}
-                  onClick={() => handlePageChange(index + 1)}
-                >
-                  {index + 1}
-                </button>
-              </li>
-            ))}
-            <li>
-              <button
-                className={`px-3 py-2 bg-gray-200 rounded-md text-gray-700 ${
-                  currentPage === totalPages
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-gray-300"
-                }`}
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-              >
-                Next
-              </button>
-            </li>
-          </ul>
-        </nav>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       </div>
     </>
   );

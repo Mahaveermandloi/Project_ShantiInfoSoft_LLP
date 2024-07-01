@@ -34,7 +34,7 @@ const SideBar = ({ isOpen, toggleSidebar }) => {
     <>
       {isOpen && isMobileScreen && (
         <div
-          className="fixed inset-0 overflow-y-auto bg-white bg-opacity-50 z-40"
+          className="fixed inset-0 overflow-y-auto bg-white  z-10"
           onClick={toggleSidebar}
         />
       )}

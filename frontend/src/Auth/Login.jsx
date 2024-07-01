@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { ToastContainer, toast, Bounce } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import img from "../assets/OIP.jpeg";
+import img from "../../public/Images/OIP.jpeg";
 import { postApi } from "../Utils/API";
 import { useNavigate } from "react-router-dom";
 
@@ -23,12 +23,13 @@ const Login = () => {
     const url = "/login";
     try {
       const response = await postApi(data, url);
-      if (response.status === 200) {
+      console.log("this is data ", data);
 
+      if (response.status === 200) {
         localStorage.setItem("accessToken", response.data.data.accessToken);
         toast.success("Login successful!");
         navigate("/dashboard");
-        window.location.reload()
+        window.location.reload();
       } else {
         toast.error("Login failed. Please try again.");
       }
@@ -124,7 +125,11 @@ const Login = () => {
                           type="button"
                           onClick={togglePasswordVisibility}
                           className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
-                          aria-label={isPasswordVisible ? "Hide password" : "Show password"}
+                          aria-label={
+                            isPasswordVisible
+                              ? "Hide password"
+                              : "Show password"
+                          }
                         >
                           {isPasswordVisible ? (
                             <svg
