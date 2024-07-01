@@ -6,13 +6,20 @@ import deviceRouter from "./routes/device.routes.js";
 import employeeRouter from "./routes/employee.routes.js";
 import vendorRouter from "./routes/vendor.routes.js";
 import projectRouter from "./routes/project.routes.js";
+import path from "path";
+import { fileURLToPath } from "url";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const app = express();
 
 // Middleware
-app.use(bodyParser.json())
+app.use(bodyParser.json());
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
+
+app.use(express.static(path.join(__dirname, "public")));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 const allowedOrigins = ["http://localhost:5173"];
 

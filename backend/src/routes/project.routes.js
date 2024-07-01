@@ -8,7 +8,7 @@ import {
   getAllResources,
   getResourceById,
 } from "../controller/resource.controller.js";
-import { documentUpload } from "../middleware/mutler.middleware.js";
+import { deviceUpload , projectUpload } from "../middleware/mutler.middleware.js";
 import { Router } from "express";
 import {
   getProjects,
@@ -27,7 +27,7 @@ router.get("/get-project/:id", verifyJWT, getProjectById);
 router.post(
   "/create-project",
   verifyJWT,
-  documentUpload.single("attachments"),
+projectUpload.single("attachments"),
   createProject
 );
 
@@ -42,7 +42,7 @@ router.delete("/delete-project/:id", verifyJWT, deleteProject);
 //   createPlan
 // );
 
-router.post("/create-plan/:id", documentUpload.single("taskDocuments"), createPlan);
+router.post("/create-plan/:id", projectUpload.single("taskDocuments"), createPlan);
 
 
 router.get("/get-plan/:id", getPlanById);
@@ -51,7 +51,7 @@ router.get("/get-all-plans/:id", getAllPlans);
 
 // ----------------------------------------------------------------------------------
 
-router.post("/create-resource/:id", documentUpload.any(), createResource);
+router.post("/create-resource/:id", projectUpload.any(), createResource);
 
 router.get("/get-resource/:id", getResourceById);
 

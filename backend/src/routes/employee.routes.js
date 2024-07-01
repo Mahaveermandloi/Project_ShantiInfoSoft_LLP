@@ -7,16 +7,16 @@ import {
   getEmployeeById,
 } from "../controller/employee.controller.js";
 
-import { documentUpload } from "../middleware/mutler.middleware.js";
+import { projectUpload } from "../middleware/mutler.middleware.js";
 const router = express.Router();
 
-router.post("/create-employee", documentUpload.any(), createEmployee);
+router.post("/create-employee", projectUpload.any(), createEmployee);
 
 router.get("/get-employees", getEmployees);
 
 router.get("/get-employee-by-id/:id", getEmployeeById);
 
-router.put("/edit-employee/:id", documentUpload.any(), updateEmployee);
+router.put("/edit-employee/:id", projectUpload.any(), updateEmployee);
 
 router.delete("/delete-employee/:id", deleteEmployee);
 

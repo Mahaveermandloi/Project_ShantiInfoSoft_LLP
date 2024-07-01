@@ -18,7 +18,7 @@ const getProjectById = asyncHandler(async (req, res, next) => {
   const project = await Project.findById(projectId);
 
   if (!project) {
-    throw new ApiError(404, "Project not found");
+    return res.status(404).json({ message: "Project not found" });
   }
 
   const response = new ApiResponse(
@@ -46,8 +46,9 @@ const createProject = asyncHandler(async (req, res, next) => {
 
   const doc = req.file;
 
+  console.log(doc);
   if (!req.file) {
-    throw new ApiError(400, "Attachment is required");
+    return res.status(400).json({ message: "Attachment is required" });
   }
 
   const attachmentPath = `/uploads/project/${doc.filename}`;
@@ -113,7 +114,7 @@ const updateProject = asyncHandler(async (req, res, next) => {
   );
 
   if (!updatedProject) {
-    throw new ApiError(404, "Project not found");
+    return res.status(404).json({ message: "Project not found" });
   }
 
   const response = new ApiResponse(
@@ -130,7 +131,7 @@ const deleteProject = asyncHandler(async (req, res, next) => {
   const deletedProject = await Project.findByIdAndDelete(projectId);
 
   if (!deletedProject) {
-    throw new ApiError(404, "Project not found");
+    return res.status(404).json({ message: "Project not found" });
   }
 
   const response = new ApiResponse(
