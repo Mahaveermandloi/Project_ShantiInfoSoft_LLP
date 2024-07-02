@@ -91,6 +91,7 @@ const createDevice = asyncHandler(async (req, res) => {
 
 const editDevice = asyncHandler(async (req, res, next) => {
   const deviceId = req.params.id;
+
   const {
     DeviceName,
     Category,
@@ -145,10 +146,10 @@ const editDevice = asyncHandler(async (req, res, next) => {
   res.status(200).json(response);
 });
 
-const assignDevice = asyncHandler(async (req, res, next) => {
+const assignDevice = asyncHandler(async (req, res) => {
   const deviceId = req.params.id;
   const { Name } = req.body;
-
+  console.log(Name, deviceId);
   let device = await Device.findById(deviceId);
 
   if (!device) {
@@ -156,9 +157,9 @@ const assignDevice = asyncHandler(async (req, res, next) => {
   }
 
   if (device.Status === "Assign") {
-    // return res.status(400).json({ message: "Already assigned to someone" });
-    device.Status = "Available";
-    device.Receiver = "";
+    return res
+      .status(400)
+      .json({ message: "Device already assigned to someone" });
   } else {
     device.Status = "Assign";
     device.Receiver = Name;
@@ -170,6 +171,32 @@ const assignDevice = asyncHandler(async (req, res, next) => {
     statusCode: 200,
     data: device,
     message: "Device assigned successfully",
+    success: true,
+  });
+});
+
+const makeDeviceAvailable = asyncHandler(async (req, res) => {
+  const deviceId = req.params.id;
+
+  console.log(deviceId);
+  let device = await Device.findById(deviceId);
+
+  if (!device) {
+    return res.status(404).json({ message: "Device not found" });
+  }
+
+  if (device.Status === "Assign") {
+    device.Status = "Available";
+  } else {
+    return res.status(400).json({ message: "Some error occured" });
+  }
+
+  await device.save();
+
+  res.status(200).json({
+    statusCode: 200,
+    data: device,
+    message: "Device Availed successfully",
     success: true,
   });
 });
@@ -198,4 +225,5 @@ export {
   editDevice,
   deleteDevice,
   assignDevice,
+  makeDeviceAvailable,
 };

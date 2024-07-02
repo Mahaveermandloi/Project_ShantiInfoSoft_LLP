@@ -6,6 +6,7 @@ import {
   deleteDevice,
   assignDevice,
   getDeviceById,
+  makeDeviceAvailable,
 } from "../controller/device.controller.js";
 import { verifyJWT } from "../middleware/auth.middleware.js";
 import { deviceUpload } from "../middleware/mutler.middleware.js";
@@ -32,13 +33,20 @@ router.put(
   "/edit-device/:id",
   verifyJWT,
   deviceUpload.fields([
-    { name: "image", maxCount: 1 },
-    { name: "bill", maxCount: 1 },
+    { name: "Image", maxCount: 1 },
+    { name: "Bill", maxCount: 1 },
   ]),
   editDevice
 );
 
 router.put("/assign-device/:id", verifyJWT, deviceUpload.any(), assignDevice);
+
+router.put(
+  "/avail-device/:id",
+  verifyJWT,
+  deviceUpload.any(),
+  makeDeviceAvailable
+);
 
 // DELETE delete a device by _id
 router.delete("/delete-device/:id", verifyJWT, deleteDevice);
