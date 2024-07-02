@@ -99,6 +99,16 @@ const DeviceTable = ({
     }
   };
 
+  const handleDownload = (Bill) => {
+    const url = `${URL_Path}${Bill}`;
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "download.pdf");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const tableHeaders = [
     "Device Name",
     "Category",
@@ -246,6 +256,7 @@ const DeviceTable = ({
                                 className="flex gap-2 items-center px-4 py-2 w-full text-left hover:bg-[#f3e9ea] bg-[#9ba0ac1a] text-gray-900"
                                 onClick={() => {
                                   setDropdownOpen(null);
+                                  handleDownload(device.Bill);
                                 }}
                               >
                                 <FileDownloadOutlinedIcon size={25} />

@@ -18,9 +18,11 @@ const AddDevice = ({ closeModal }) => {
     console.log(response.data);
     if (response.data.statusCode === 201) {
       toast.success("Device Added Successfully");
+
       setTimeout(() => {
         closeModal();
         reset();
+        window.location.reload();
       }, 2000);
     } else {
       alert("Some error occurred");
