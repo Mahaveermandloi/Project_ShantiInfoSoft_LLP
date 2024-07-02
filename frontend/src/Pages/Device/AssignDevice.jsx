@@ -4,7 +4,9 @@ import { getApi, putApi } from "../../Utils/API";
 import { toast } from "react-toastify";
 import { Toast } from "../../Components/Toast.jsx";
 
-const AssignDevice = ({ deviceId, closeModal }) => {
+const AssignDevice = ({ assignDevice, setAssignDevice }) => {
+  // alert(assignDevice);
+  const deviceId = assignDevice;
   const {
     register,
     handleSubmit,
@@ -14,22 +16,26 @@ const AssignDevice = ({ deviceId, closeModal }) => {
 
   const [employees, setEmployees] = useState([]); // State for storing devices
 
+
   const onSubmit = async (data) => {
-    const url = `/api/device/assign-device/${deviceId}`;
+    try {
+      const url = `/api/device/assign-device/${deviceId}`;
+      const response = await putApi(data, url);
+      console.log("this is response data", response.data);
 
-    const response = await putApi(data, url);
-
-    if (response.statusCode === 200) {
-      toast.success("Device Assigned Successfully");
-
-      setTimeout(() => {
-        closeModal();
-        reset();
-        window.location.reload();
-      }, 1000);
-    } else {
-      alert("Some error occurred");
-      toast.error("Some Error occured");
+      if (response.statusCode === 200) {
+        toast.success("Device Assigned Successfully");
+        setTimeout(() => {
+          setAssignDevice(null);
+          reset();
+          window.location.reload();
+        }, 1000);
+      } else {
+        toast.error(response.message || "Some Error Occurred");
+      }
+    } catch (error) {
+      console.error("Error in onSubmit:", error);
+      toast.error(error.response?.data?.message || "Some Error Occurred");
     }
   };
 
@@ -61,8 +67,10 @@ const AssignDevice = ({ deviceId, closeModal }) => {
           <div className="flex items-center justify-between border-b pb-4">
             <h3 className="text-xl font-semibold text-gray-900">Add Device</h3>
             <button
+              onClick={() => {
+                setAssignDevice(null);
+              }}
               className="text-gray-400 hover:bg-gray-200 hover:text-gray-900 rounded-lg w-8 h-8 flex items-center justify-center focus:outline-none"
-              onClick={closeModal}
             >
               <svg
                 className="w-4 h-4"

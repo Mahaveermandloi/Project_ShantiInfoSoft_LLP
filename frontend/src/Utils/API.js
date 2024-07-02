@@ -77,7 +77,6 @@ const putApi = async (data, route) => {
         }
       }
     }
-    
 
     // Log formData entries for debugging
     for (let [key, value] of formData.entries()) {
@@ -95,6 +94,7 @@ const putApi = async (data, route) => {
     // Make PUT request using Axios
     const response = await axios.put(url, formData, { headers });
 
+    console.log(response.data);
     return response.data; // Return the response data
   } catch (error) {
     console.error("Error in putApi:", error);

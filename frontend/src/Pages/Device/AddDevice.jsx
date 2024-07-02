@@ -27,13 +27,26 @@ const AddDevice = ({ closeModal }) => {
     }
   };
 
-  const years = Array.from(
-    { length: 50 },
-    (_, i) => new Date().getFullYear() + i
-  );
-  const months = Array.from({ length: 12 }, (_, i) => i + 1);
+  const startYear = 2020;
+  const numYears = 30;
+  const years = Array.from({ length: numYears }, (_, i) => startYear + i);
 
-  const categories = ["Category 1", "Category 2", "Category 3"]; // Example categories
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  const categories = ["Mouse", "Keyboard", "HeadPhone", "Laptop", "Printer"]; // Example categories
 
   return (
     <>
@@ -280,6 +293,7 @@ const AddDevice = ({ closeModal }) => {
                   >
                     Upload Device Image:
                   </label>
+
                   <input
                     type="file"
                     id="Image"
@@ -287,6 +301,7 @@ const AddDevice = ({ closeModal }) => {
                     {...register("Image", {
                       required: "Device image is required",
                     })}
+                    accept="image/*"
                   />
                   {errors.Image && (
                     <span className="text-red-500 text-sm">

@@ -3,7 +3,7 @@ import { TbEdit } from "react-icons/tb";
 import { AiOutlineDelete } from "react-icons/ai";
 import { FaEllipsisH } from "react-icons/fa";
 import { toast } from "react-toastify";
-import { deleteApi } from "../../Utils/API.js";
+import { deleteApi, putApi } from "../../Utils/API.js";
 import { Svg } from "../../Components/Svg.jsx";
 import Pagination from "../../Components/Pagination.jsx";
 import { URL_Path } from "../../Utils/constant.jsx";
@@ -25,9 +25,11 @@ const DeviceTable = ({
   searchTerm = "", // Default searchTerm to an empty string
 }) => {
   const [dropdownOpen, setDropdownOpen] = useState(null);
-  const [assignDevice, setAssignDevice] = useState(false);
+  const [assignDevice, setAssignDevice] = useState(null);
   const [assignDropdownOpen, setAssignDropdownOpen] = useState(null);
   const [deviceIdToDelete, setDeviceIdToDelete] = useState(""); // State to hold deviceId to delete
+
+  const [id, setId] = useState();
 
   const modalRef = useRef(null);
 
@@ -51,6 +53,7 @@ const DeviceTable = ({
   };
 
   const handleAssignDropdownToggle = (deviceId) => {
+    setId(deviceId);
     setAssignDropdownOpen(assignDropdownOpen === deviceId ? null : deviceId);
   };
 
@@ -58,7 +61,30 @@ const DeviceTable = ({
     setDeviceIdToDelete(deviceId); // Set the device id to delete
   };
 
- 
+  const onSubmit = async (deviceId) => {
+    try {
+      const url = `/api/device/avail-device/${deviceId}`;
+      const data = "";
+
+      const response = await putApi(data, url);
+      console.log("this is response data", response.data);
+
+      if (response.statusCode === 200) {
+        toast.success("Device Availed Successfully");
+        window.location.reload();
+
+        setTimeout(() => {
+          setAssignDevice(null);
+          reset();
+        }, 1000);
+      } else {
+        toast.error(response.message || "Some Error Occurred");
+      }
+    } catch (error) {
+      console.error("Error in onSubmit:", error);
+      toast.error(error.response?.data?.message || "Some Error Occurred");
+    }
+  };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -154,7 +180,7 @@ const DeviceTable = ({
                     </td>
 
                     <td className="px-6 py-4 text-gray-900 whitespace-nowrap">
-                      {`${device.WarrantyYear} year(s) ${device.WarrantyMonth} month(s)`}
+                      {device.WarrantyStartDate}
                     </td>
 
                     <td className="px-6 py-4 relative">
@@ -176,6 +202,7 @@ const DeviceTable = ({
                                 className="flex gap-2 items-center px-4 py-2 w-full text-left hover:bg-[#e6e9ef] bg-[#21A8710D] text-green-500"
                                 onClick={() => {
                                   handleAssignDropdownToggle(device._id);
+
                                   setDropdownOpen(false);
                                 }}
                               >
@@ -205,8 +232,8 @@ const DeviceTable = ({
                               <button
                                 className="flex gap-2 items-center px-4 py-2 w-full text-left hover:bg-[#f3e9ea] bg-[#fef4f5] text-[#E71D36]"
                                 onClick={() => {
-                                  handleDeleteDevice(device._id); // Set device id to delete
-                                  setDropdownOpen(null); // Close the main dropdown
+                                  handleDeleteDevice(device._id);
+                                  setDropdownOpen(null);
                                 }}
                               >
                                 <AiOutlineDelete size={25} />
@@ -230,25 +257,35 @@ const DeviceTable = ({
                       )}
 
                       {assignDropdownOpen === device._id && (
-                        <div
-                          ref={modalRef}
-                          className="absolute ml-0 z-10 bg-white divide-y divide-gray-100 rounded-lg lg:w-44 shadow-md left-[-90%] lg:left-[-50%]"
-                        >
-                          <ul className="flex flex-col gap-1 py-2 text-sm text-gray-700 dark:text-gray-200">
-                            <li>
-                              <AssignDevice
-                                closeModal={() => {
-                                  setAssignDevice(false);
-                                }}
-                                deviceId={device._id}
-                              />
-                            </li>
-
-                            <li>
-                              <AssignDropdown />
-                            </li>
-                          </ul>
-                        </div>
+                        <>
+                          <div
+                            ref={modalRef}
+                            className="absolute ml-0 z-10 bg-white divide-y divide-gray-100 rounded-lg lg:w-44 shadow-md left-[-90%] lg:left-[-50%]"
+                          >
+                            <ul className="flex flex-col gap-1 py-2 text-sm text-gray-700 dark:text-gray-200">
+                              <li>
+                                <button
+                                  className="flex gap-2 items-center px-4 py-2 w-full text-left hover:bg-[#e6e9ef] bg-[#21A8710D] text-green-500"
+                                  onClick={() => {
+                                    setAssignDevice(device._id);
+                                  }}
+                                >
+                                  Assign
+                                </button>
+                              </li>
+                              <li>
+                                <button
+                                  className="flex gap-2 items-center px-4 py-2 w-full text-left hover:bg-[#e6e9ef] bg-[#9ba0ac1a] text-gray-900"
+                                  onClick={() => {
+                                    onSubmit(device._id);
+                                  }}
+                                >
+                                  Available
+                                </button>
+                              </li>
+                            </ul>
+                          </div>
+                        </>
                       )}
                     </td>
                   </tr>
@@ -257,6 +294,15 @@ const DeviceTable = ({
           </tbody>
         </table>
       </div>
+
+      {assignDevice === id && (
+        <>
+          <AssignDevice
+            assignDevice={assignDevice}
+            setAssignDevice={setAssignDevice}
+          />
+        </>
+      )}
 
       <Pagination
         totalPages={totalPages}
