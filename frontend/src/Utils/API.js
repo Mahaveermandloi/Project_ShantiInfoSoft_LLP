@@ -2,12 +2,16 @@ import axios from "axios";
 import { URL_Path } from "./constant";
 
 const postApi = async (data, route) => {
+  
+  
   try {
     const url = `${URL_Path}${route}`;
 
+    
     // Create FormData
     const formData = new FormData();
-
+    
+    
     for (const key in data) {
       if (data.hasOwnProperty(key)) {
         if (data[key] instanceof FileList) {
@@ -17,6 +21,7 @@ const postApi = async (data, route) => {
         }
       }
     }
+  
 
     // Log formData entries for debugging
     for (let [key, value] of formData.entries()) {
@@ -35,10 +40,12 @@ const postApi = async (data, route) => {
     const response = await axios.post(url, formData, { headers });
 
     return response;
-  } catch (error) {
+  }
+   catch (error) {
     console.error("Error in postApi:", error);
     throw error;
   }
+
 };
 
 // GET API

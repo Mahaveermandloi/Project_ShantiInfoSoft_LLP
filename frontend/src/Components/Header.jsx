@@ -4,14 +4,21 @@ import { GiHamburgerMenu } from "react-icons/gi";
 import SideBar from "./SideBar";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../../public/Images/Shantilogo.png";
+import { URL_Path } from "../Utils/constant";
+import { Toast } from "../Components/Toast.jsx";
 
 import user from "../../public/Images/user.png";
 import { MdHelpOutline } from "react-icons/md";
+import { postApi } from "../Utils/API";
+import { toast } from "react-toastify";
 
 const Header = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
+
+  let email = "";
+  email = localStorage.getItem("email");
 
   useEffect(() => {
     const handleResize = () => {
@@ -37,14 +44,36 @@ const Header = () => {
     setDropdownOpen(!dropdownOpen);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("accessToken"); // Remove access token from localStorage
-    navigate("/login");
-    window.location.reload();
+  const handleLogout = async () => {
+    const url = `/logout`;
+    const role = localStorage.getItem("role");
+
+    const data = { role };
+    console.log(data); // Ensure the data object is correct
+
+    try {
+      const response = await postApi(data, url);
+
+      console.log(response);
+
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("role");
+      localStorage.removeItem("email");
+      const accessToken = localStorage.getItem("accessToken");
+
+      if (accessToken === null) {
+        toast.success(`${role.toLocaleUpperCase()} logged out successfully `);
+        navigate("/login");
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
 
   return (
     <>
+      <Toast />
       <header className="shadow-lg sticky top-0 z-50 bg-white border-gray-200 lg:justify-between lg:p-5 lg:items-center lg:flex flex justify-around items-center h-16">
         <div className="lg:hidden">
           <GiHamburgerMenu size={40} onClick={toggleSidebar} />
@@ -68,7 +97,7 @@ const Header = () => {
               className="flex items-center space-x-3 cursor-pointer"
             >
               <img src={user} className="h-10" alt="" />
-              <span>Sagar Sir</span>
+              <span>{email}</span>
               <FaAngleDown className="ml-1" />
             </Link>
             {dropdownOpen && (

@@ -2,22 +2,24 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
-import Device from "../Pages/Device/Device";
-import Employee from "../Pages/Employee/Employee";
-import Project from "../Pages/Project/Project";
-import AddProject from "../Pages/Project/AddProject";
-import AddEpicTask from "../Pages/Project/AddEpicTask";
+import Device from "../Pages/Admin/Device/Device";
+import Employee from "../Pages/Admin/Employee/Employee";
+import Project from "../Pages/Admin/Project/Project";
+import AddProject from "../Pages/Admin/Project/AddProject";
+import AddEpicTask from "../Pages/Admin/Project/AddEpicTask";
 
 
-import { ProjectDetail } from "../Pages/Project/ProjectDetail";
+import { ProjectDetail } from "../Pages/Admin/Project/ProjectDetail";
 
 
-import Dashboard from "../Pages/Dashboard/Dashboard";
-import Meeting_Rooms from "../Pages/Meeting_Rooms/Meeting_Rooms";
+import Dashboard from "../Pages/Admin/Dashboard/Dashboard";
+import Meeting_Rooms from "../Pages/Admin/Meeting_Rooms/Meeting_Rooms";
 
 const AppRoutes = () => {
   return (
     <Routes>
+
+      
       <Route path="/" element={<Navigate to="/dashboard" />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/meeting-rooms" element={<Meeting_Rooms />} />

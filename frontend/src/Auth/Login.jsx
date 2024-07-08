@@ -5,6 +5,8 @@ import "react-toastify/dist/ReactToastify.css";
 import img from "../../public/Images/OIP.jpeg";
 import { postApi } from "../Utils/API";
 import { useNavigate } from "react-router-dom";
+import { Toast } from "../Components/Toast";
+import mainimage from "../../public/Images/mainimage.png";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -23,39 +25,39 @@ const Login = () => {
     const url = "/login";
     try {
       const response = await postApi(data, url);
-      console.log("this is data ", data);
 
       if (response.status === 200) {
+        const role = response.data.data.role;
         localStorage.setItem("accessToken", response.data.data.accessToken);
+
+        localStorage.setItem("role", role);
         toast.success("Login successful!");
-        navigate("/dashboard");
+
+        if (role === "admin") {
+          localStorage.setItem("email", response.data.data.admin.email);
+          navigate("/dashboard");
+        } else if (role === "user") {
+          localStorage.setItem("email", response.data.data.user.email);
+          navigate("/user/dashboard");
+        }
         window.location.reload();
       } else {
         toast.error("Login failed. Please try again.");
       }
     } catch (error) {
-      console.error("Login error:", error);
-      toast.error("Error logging in. Please try again later.");
+      toast.error(error.response.data.message);
     }
   };
+
   return (
     <>
       <div className="flex">
-        <div className="lg:flex hidden lg:w-2/3 bg-red-500 h-screen">Image</div>
+        <div className="lg:flex hidden lg:w-2/3  h-screen">
+          <img src={mainimage} alt=""  className="w-full"/>
+        </div>
+
         <div className="w-full lg:w-1/3 bg-cyan-500">
-          <ToastContainer
-            position="top-center"
-            autoClose={3000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="light"
-            transition={Bounce}
-          />
+          <Toast />
 
           <section className="bg-gray-100">
             <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
