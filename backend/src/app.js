@@ -6,6 +6,7 @@ import deviceRouter from "./routes/device.routes.js";
 import employeeRouter from "./routes/employee.routes.js";
 import vendorRouter from "./routes/vendor.routes.js";
 import projectRouter from "./routes/project.routes.js";
+import userRouter from "./routes/user.routes.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -37,11 +38,13 @@ app.use(
 
 // Routes
 app.use("/", adminRouter);
+app.use("/", userRouter);
 app.use("/api/device", deviceRouter);
 app.use("/api/employee", employeeRouter);
 app.use("/api/vendor", vendorRouter);
 app.use("/api/project", projectRouter);
 app.use("/api/plan", projectRouter); // Separate router for plans
 app.use("/api/resource", projectRouter); // Separate router for resources
+app.use("/api/timesheet", projectRouter); // Separate router for resources
 
 export { app };

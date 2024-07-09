@@ -2,13 +2,13 @@ import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-const adminSchema = new Schema(
+const userSchema = new Schema(
   {
     email: {
       type: String,
       required: true,
       unique: true,
-      lowercase: true,
+    
       trim: true,
     },
     password: {
@@ -30,7 +30,7 @@ const adminSchema = new Schema(
 );
 
 // Middleware to hash password before saving
-adminSchema.pre("save", async function (next) {
+userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {
     return next();
   }
@@ -39,12 +39,12 @@ adminSchema.pre("save", async function (next) {
 });
 
 // Custom method to check if password is correct
-adminSchema.methods.isPasswordCorrect = async function (password) {
+userSchema.methods.isPasswordCorrect = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
 
 // Custom method to generate access token
-adminSchema.methods.generateAccessToken = function () {
+userSchema.methods.generateAccessToken = function () {
   return jwt.sign(
     {
       _id: this._id,
@@ -58,7 +58,7 @@ adminSchema.methods.generateAccessToken = function () {
 };
 
 // Custom method to generate refresh token
-adminSchema.methods.generateRefreshToken = function () {
+userSchema.methods.generateRefreshToken = function () {
   return jwt.sign(
     {
       _id: this._id,
@@ -70,4 +70,4 @@ adminSchema.methods.generateRefreshToken = function () {
   );
 };
 
-export const Admin = mongoose.model("Admin", adminSchema);
+export const User = mongoose.model("User", userSchema);

@@ -21,8 +21,14 @@ const resourceSchema = new mongoose.Schema({
     required: true,
   },
   dailyHours: {
-    type: String,
+    type: Number,
     required: true,
+    min: [0, "Daily hours must be at least 0"],
+    max: [24, "Daily hours cannot exceed 24"],
+    validate: {
+      validator: Number.isInteger,
+      message: "{VALUE} is not an integer value",
+    },
   },
 });
 

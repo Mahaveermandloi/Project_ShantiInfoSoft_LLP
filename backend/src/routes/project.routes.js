@@ -2,13 +2,19 @@ import {
   createPlan,
   getAllPlans,
   getPlanById,
+  createSubTask,
+  // getSubTasksByPlanId,
+  getSubTasksByName,
 } from "../controller/plan.controller.js";
 import {
   createResource,
   getAllResources,
   getResourceById,
 } from "../controller/resource.controller.js";
-import { deviceUpload , projectUpload } from "../middleware/mutler.middleware.js";
+import {
+  deviceUpload,
+  projectUpload,
+} from "../middleware/mutler.middleware.js";
 import { Router } from "express";
 import {
   getProjects,
@@ -18,6 +24,7 @@ import {
   deleteProject,
 } from "../controller/project.controller.js";
 import { verifyJWT } from "../middleware/auth.middleware.js";
+import { CreateTimesheet, getAllTimesheets } from "../controller/timesheet.controller.js";
 const router = Router();
 
 router.get("/get-projects", verifyJWT, getProjects);
@@ -27,7 +34,7 @@ router.get("/get-project/:id", verifyJWT, getProjectById);
 router.post(
   "/create-project",
   verifyJWT,
-projectUpload.single("attachments"),
+  projectUpload.single("attachments"),
   createProject
 );
 
@@ -42,8 +49,11 @@ router.delete("/delete-project/:id", verifyJWT, deleteProject);
 //   createPlan
 // );
 
-router.post("/create-plan/:id", projectUpload.single("taskDocuments"), createPlan);
-
+router.post(
+  "/create-plan/:id",
+  projectUpload.single("taskDocuments"),
+  createPlan
+);
 
 router.get("/get-plan/:id", getPlanById);
 
@@ -56,5 +66,18 @@ router.post("/create-resource/:id", projectUpload.any(), createResource);
 router.get("/get-resource/:id", getResourceById);
 
 router.get("/get-all-resources/:id", getAllResources);
+
+// --------------------------------------------------------------------------------
+
+router.post("/create-subtask/:planName", projectUpload.any(), createSubTask);
+
+// router.get("/get-subtask/:planId", getSubTasksByPlanId);
+
+router.get("/get-subtask-by-name/:name", getSubTasksByName);
+
+// ----------------------------------------------------------------------------
+router.post("/create-timesheet", projectUpload.any(), CreateTimesheet);
+
+router.get("/get-all-timesheets/:projectId",getAllTimesheets )
 
 export default router;
