@@ -1,6 +1,3 @@
-
-
-
 import React, { useState, useEffect } from "react";
 import { Svg } from "../../../Components/Svg.jsx";
 import { useParams } from "react-router-dom";
@@ -9,11 +6,20 @@ import { getApi } from "../../../Utils/API.js";
 import { FaSortDown } from "react-icons/fa";
 
 const Timesheet = () => {
+  const [Subtask, setSubTask] = useState([]);
+  const [sprintName, setSprintName] = useState("");
+  const [Sprint, setSprints] = useState([]);
+  const [projectName, setProjectName] = useState("");
+
   const { id } = useParams();
   const [groupedData, setGroupedData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+
+  const [selectedSprint, setSelectedSprint] = useState("");
+
+  const [selectedSubtask, setSelectedSubtask] = useState("");
 
   const today = new Date();
   const defaultStartDate = today.toISOString().split("T")[0];
@@ -22,6 +28,8 @@ const Timesheet = () => {
     .split("T")[0];
   const [startDate, setStartDate] = useState(defaultStartDate);
   const [endDate, setEndDate] = useState(defaultEndDate);
+
+  const [newData, setNewData] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -51,7 +59,11 @@ const Timesheet = () => {
 
           console.log(groupedArray);
 
+          setNewData(groupedArray);
+
+          console.log(newData);
           setGroupedData(groupedArray);
+
           setLoading(false);
         } else {
           setLoading(false);
@@ -65,6 +77,57 @@ const Timesheet = () => {
 
     fetchData();
   }, [id, startDate, endDate]);
+
+  useEffect(() => {
+    const fetchProjectName = async () => {
+      const url = `/api/project/get-project/${id}`;
+      try {
+        const response = await getApi(url);
+        console.log("Project Name:", response.data.data.projectName);
+        setProjectName(response.data.data.projectName);
+      } catch (error) {
+        console.error("Error fetching project name:", error);
+      }
+    };
+
+    const fetchSprints = async () => {
+      const url = `/api/plan/get-all-plans/${id}`;
+      try {
+        const response = await getApi(url);
+        console.log("Sprints:", response);
+        if (response && response.data && response.data.success) {
+          setSprints(response.data.data);
+        } else {
+          console.error(
+            "Failed to fetch sprints:",
+            response && response.data ? response.data.message : "Unknown error"
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching sprints:", error);
+      }
+    };
+
+    fetchSprints();
+    fetchProjectName();
+  }, [id]);
+
+  useEffect(() => {
+    if (sprintName) {
+      const fetchSubtasks = async () => {
+        const url = `/api/project/get-subtask-by-name/${sprintName}`;
+        try {
+          const response = await getApi(url);
+
+          setSubTask(response.data.data);
+        } catch (error) {
+          console.error("Error fetching subtasks:", error);
+        }
+      };
+
+      fetchSubtasks();
+    }
+  }, [sprintName]);
 
   const toggleRowExpansion = (index) => {
     setCurrentPage(1); // Reset page when expanding rows
@@ -90,6 +153,9 @@ const Timesheet = () => {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  console.log("this is paginated Data ", paginatedData);
+
   const totalPages = Math.ceil(groupedData.length / itemsPerPage);
 
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
@@ -99,8 +165,28 @@ const Timesheet = () => {
     return `${hours}:${minutes < 10 ? "0" : ""}${minutes}`;
   };
 
+  const filterUsingSprintName = (sprintName, subtask, resourceName) => {
+    const filteredData = newData.map((group) => {
+      if (group.resourceName === resourceName) {
+        return {
+          ...group,
+          data: group.data.filter((item) => {
+            if (!item) return false; // Check if item is defined
+            if (sprintName && item.sprintName !== sprintName) return false;
+            if (subtask && item.subTaskName !== subtask) return false;
+            return true;
+          }),
+        };
+      }
+      return group;
+    });
+
+    setGroupedData(filteredData);
+  };
+
   return (
     <>
+
       <div className="flex justify-between lg:justify-end gap-5 lg:mr-10">
         <div className="flex flex-col">
           <label htmlFor="start-date" className="text-xs">
@@ -139,23 +225,16 @@ const Timesheet = () => {
                     <Svg />
                   </div>
                 </th>
-                <th scope="col" className="px-6 py-3">
-                  <div className="flex items-center text-black">
-                    Date
-                    <Svg />
-                  </div>
-                </th>
+
                 <th scope="col" className="px-6 py-3">
                   <div className="flex items-center text-black">
                     Total Time
                     <Svg />
                   </div>
                 </th>
-                <th scope="col" className="px-6 py-3">
-                  <div className="flex items-center text-black">More</div>
-                </th>
               </tr>
             </thead>
+
             <tbody>
               {loading ? (
                 <tr>
@@ -181,86 +260,164 @@ const Timesheet = () => {
                           {group.resourceName}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-gray-900 whitespace-nowrap">
-                        {new Date(group.data[0].date).toLocaleDateString()}
-                      </td>
+
                       <td className="px-6 py-4 text-gray-900 whitespace-nowrap">
                         {calculateTotalTime(group)}
                       </td>
-                      <td
-                        className="px-6 py-4 text-gray-900 whitespace-nowrap"
-                        onClick={() => toggleRowExpansion(index)}
-                      >
-                        <FaSortDown
-                          size={23}
-                          className={`ml-1 transition-transform duration-300 transform ${
-                            group.expanded ? "rotate-180" : ""
-                          }`}
-                        />
+                    </tr>
+
+                    <div className="flex my-3 ml-10 gap-10 ">
+                      <div className="flex items-center gap-4">
+                        <label
+                          htmlFor="sprint"
+                          className="block text-sm font-medium text-gray-700"
+                        >
+                          Sprint:
+                        </label>
+                        <select
+                          id="sprint"
+                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500
+                           text-black
+                          focus:border-indigo-500 sm:text-sm"
+                          onChange={(e) => {
+                            const selectedValue = e.target.value;
+
+                            setSelectedSprint(selectedValue);
+                            setSprintName(selectedValue);
+                            filterUsingSprintName(
+                              e.target.value,
+                              selectedSubtask,
+                              group.resourceName
+                            );
+                          }}
+                        >
+                          <option value="" className="text-black">
+                            Select Sprint
+                          </option>
+                          {Sprint.map(({ epicName, _id }) => (
+                            <option
+                              key={_id}
+                              value={epicName}
+                              className="text-black"
+                            >
+                              {epicName}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="flex items-center gap-4">
+                        <label
+                          htmlFor="subtask"
+                          className="block text-sm font-medium text-gray-700"
+                        >
+                          SubTask:
+                        </label>
+                        <select
+                          id="subtask"
+                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm
+                          text-black
+                          "
+                          onChange={(e) => {
+                            setSelectedSubtask(e.target.value);
+                            filterUsingSprintName(
+                              selectedSprint,
+                              e.target.value,
+                              group.resourceName
+                            );
+                          }}
+                        >
+                          <option value="">Select SubTask</option>
+                          {Subtask.map(({ name, _id }) => (
+                            <option
+                              key={_id}
+                              value={name}
+                              className="text-black"
+                            >
+                              {name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <tr key={`${index}-details`} className="bg-gray-900 mt-2">
+                      <td colSpan="4" className="px-6">
+                        <div className="p-2">
+                          <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                            <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                              <tr>
+                                <th scope="col" className="px-6 py-2">
+                                  Sprint Name
+                                </th>
+                                <th scope="col" className="px-6 py-2">
+                                  Sub Task
+                                </th>
+                                <th scope="col" className="px-6 py-2">
+                                  Date
+                                </th>
+                                <th scope="col" className="px-6 py-2">
+                                  Start Time
+                                </th>
+                                <th scope="col" className="px-6 py-2">
+                                  End Time
+                                </th>
+                                <th scope="col" className="px-6 py-2">
+                                  Hours
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {group.data.length === 0 ? (
+                                <>
+                                  <p>No data found</p>
+                                </>
+                              ) : (
+                                <>
+                                  {group.data.map((item, subIndex) => (
+                                    <tr
+                                      key={`${index}-sub-${subIndex}`}
+                                      className="bg-white border-b dark:bg-gray-100 dark:border-gray-700"
+                                    >
+                                      <td className="px-6 py-4">
+                                        {item.sprintName}
+                                      </td>
+                                      <td className="px-6 py-4">
+                                        {item.subTaskName}
+                                      </td>
+
+                                      <td className="px-6 py-4">
+                                        {/* {new Date(
+                                          item.date
+                                        ).toLocaleDateString()} */}
+                                        {item.date
+                                          ? new Date(
+                                              item.date
+                                            ).toLocaleDateString()
+                                          : "No date"}
+
+                                        {/* {item.date} */}
+                                      </td>
+
+                                      <td className="px-6 py-4">
+                                        {item.startTime}
+                                      </td>
+                                      <td className="px-6 py-4">
+                                        {item.endTime}
+                                      </td>
+
+                                      <td className="px-6 py-4">
+                                        {formatTotalTime(item.totalTime)}
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </>
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
                       </td>
                     </tr>
-                    {group.expanded && (
-                      <tr key={`${index}-details`} className="bg-gray-100">
-                        <td colSpan="4" className="px-6 py-4">
-                          <div className="p-2">
-                            <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                              <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                                <tr>
-                                  <th scope="col" className="px-6 py-2">
-                                    Sprint Name
-                                  </th>
-                                  <th scope="col" className="px-6 py-2">
-                                    Sub Task
-                                  </th>
-                                  <th scope="col" className="px-6 py-2">
-                                    Date
-                                  </th>
-                                  <th scope="col" className="px-6 py-2">
-                                    Start Time
-                                  </th>
-                                  <th scope="col" className="px-6 py-2">
-                                    End Time
-                                  </th>
-                                  <th scope="col" className="px-6 py-2">
-                                    Hours
-                                  </th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {group.data.map((item, subIndex) => (
-                                  <tr
-                                    key={`${index}-sub-${subIndex}`}
-                                    className="bg-white border-b dark:bg-gray-100 dark:border-gray-700"
-                                  >
-                                    <td className="px-6 py-4">
-                                      {item.sprintName}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                      {item.subTaskName}
-                                    </td>
-
-                                    <td className="px-6 py-4">
-                                      {new Date(item.date).toLocaleDateString()}
-                                    </td>
-
-                                    <td className="px-6 py-4">
-                                      {item.startTime}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                      {item.endTime}
-                                    </td>
-
-                                    <td className="px-6 py-4">
-                                      {formatTotalTime(item.totalTime)}
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
                   </React.Fragment>
                 ))
               )}
@@ -268,13 +425,17 @@ const Timesheet = () => {
           </table>
         </div>
       </div>
-      <div className="flex justify-end m-4">
+
+      <div className="flex justify-center   ">
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={handlePageChange}
         />
       </div>
+
+
+
     </>
   );
 };

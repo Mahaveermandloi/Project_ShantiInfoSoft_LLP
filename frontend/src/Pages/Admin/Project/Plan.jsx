@@ -9,7 +9,6 @@ import SubTask from "./SubTask.jsx";
 import Pagination from "../../../Components/Pagination.jsx";
 import { IoMdAddCircleOutline } from "react-icons/io";
 
-
 const Plan = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -18,7 +17,7 @@ const Plan = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [expandedRows, setExpandedRows] = useState([]);
-  const [SubTasksByPlanId, setSubTasksByPlanId] = useState([]);
+  const [subTasksByPlanId, setSubTasksByPlanId] = useState({});
 
   const [subTask, setSubTask] = useState(false);
 
@@ -51,12 +50,15 @@ const Plan = () => {
 
   const [planName, setPlanName] = useState("");
 
-  const getSubTask = async (planName) => {
+  const getSubTask = async (planName, index) => {
     try {
       const url = `/api/project/get-subtask-by-name/${planName}`;
       const response = await getApi(url);
       console.log(response.data);
-      setSubTasksByPlanId(response.data.data);
+      setSubTasksByPlanId((prev) => ({
+        ...prev,
+        [index]: response.data.data,
+      }));
     } catch (error) {
       console.error("Error fetching project:", error);
     }
@@ -66,10 +68,13 @@ const Plan = () => {
     setCurrentPage(pageNumber);
   };
 
-  const toggleRowExpansion = (index) => {
-    setExpandedRows((prev) =>
-      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
-    );
+  const toggleRowExpansion = (index, planName) => {
+    if (expandedRows.includes(index)) {
+      setExpandedRows((prev) => prev.filter((i) => i !== index));
+    } else {
+      setExpandedRows((prev) => [...prev, index]);
+      getSubTask(planName, index);
+    }
   };
 
   const tableHeaders = [
@@ -160,7 +165,7 @@ const Plan = () => {
                         currentPage * itemsPerPage
                       )
                       .map((item, index) => (
-                        <>
+                        <React.Fragment key={index}>
                           <tr className="bg-white border-b">
                             <td className="px-6 py-4">{item.epicName}</td>
                             <td className="px-6 py-4">{item.featureName}</td>
@@ -183,10 +188,9 @@ const Plan = () => {
                             <td className="px-6 py-4">
                               <FaSortDown
                                 size={25}
-                                onClick={() => {
-                                  toggleRowExpansion(index);
-                                  getSubTask(item.epicName);
-                                }}
+                                onClick={() =>
+                                  toggleRowExpansion(index, item.epicName)
+                                }
                               />
                             </td>
                           </tr>
@@ -212,31 +216,27 @@ const Plan = () => {
                                     </thead>
 
                                     <tbody>
-                                      {SubTasksByPlanId.length === 0 ? (
-                                        <>
-                                          <div>No Subtask to Show</div>
-                                        </>
+                                      {subTasksByPlanId[index]?.length === 0 ? (
+                                        <div>No Subtask to Show</div>
                                       ) : (
-                                        <>
-                                          {SubTasksByPlanId &&
-                                            SubTasksByPlanId.map(
-                                              ({ name, hours, type }) => (
-                                                <>
-                                                  <tr className="bg-white border-b  dark:border-gray-700">
-                                                    <td className="px-6 py-2">
-                                                      {name}
-                                                    </td>
-                                                    <td className="px-6 py-2">
-                                                      {hours}
-                                                    </td>
-                                                    <td className="px-6 py-2">
-                                                      {type}
-                                                    </td>
-                                                  </tr>
-                                                </>
-                                              )
-                                            )}
-                                        </>
+                                        subTasksByPlanId[index]?.map(
+                                          ({ name, hours, type }, subIndex) => (
+                                            <tr
+                                              key={subIndex}
+                                              className="bg-white border-b  dark:border-gray-700"
+                                            >
+                                              <td className="px-6 py-2">
+                                                {name}
+                                              </td>
+                                              <td className="px-6 py-2">
+                                                {hours}
+                                              </td>
+                                              <td className="px-6 py-2">
+                                                {type}
+                                              </td>
+                                            </tr>
+                                          )
+                                        )
                                       )}
                                     </tbody>
                                   </table>
@@ -244,7 +244,7 @@ const Plan = () => {
                               </td>
                             </tr>
                           )}
-                        </>
+                        </React.Fragment>
                       ))
                   )}
                 </tbody>
@@ -252,11 +252,7 @@ const Plan = () => {
             </div>
           </div>
 
-          {subTask && (
-            <>
-              <SubTask setSubTask={setSubTask} planName={planName} />
-            </>
-          )}
+          {subTask && <SubTask setSubTask={setSubTask} planName={planName} />}
         </div>
 
         <Pagination
