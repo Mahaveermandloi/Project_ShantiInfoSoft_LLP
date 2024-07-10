@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { CiSearch } from "react-icons/ci";
-import { getApi } from "../../../Utils/API.js";
-import Pagination from "../../../Components/Pagination.jsx";
+import { getApi } from "../../../../Utils/API.js";
+import Pagination from "../../../../Components/Pagination.jsx";
 import NoteAddIcon from "@mui/icons-material/NoteAdd";
 import { FaEllipsisH } from "react-icons/fa";
 import AddResource from "./AddResource.jsx";
@@ -82,6 +82,7 @@ const Resource = () => {
       <div>
         <div className="flex lg:justify-end">
           <div className="flex space-x-5">
+            
             <div className="flex">
               <input
                 type="text"
@@ -102,6 +103,7 @@ const Resource = () => {
               </span>
               <span className="hidden lg:block">Add Resource</span>
             </button>
+            
           </div>
         </div>
 

@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { IoArrowBackSharp } from "react-icons/io5";
 
-import Plan from "./Plan.jsx";
-import { getApi, postApi } from "../../../Utils/API.js";
-import Resource from "./Resource.jsx";
-import { Svg } from "../../../Components/Svg.jsx";
-import Timesheet from "./Timesheet.jsx";
+import Plan from "../Plan/Plan.jsx";
+import { getApi, postApi } from "../../../../Utils/API.js";
+import Resource from "../Resource/Resource.jsx";
+import { Svg } from "../../../../Components/Svg.jsx";
+import Timesheet from "../TimeSheet/Employee.jsx";
+import TimesheetTab from "../TimeSheet/TimesheetTab.jsx";
 
 const tabs = [
   { name: "Project Detail", key: "projectDetail" },
@@ -30,7 +31,6 @@ const ProjectDetail = () => {
 
         if (response && response.data && response.data.success) {
           setProjectDetails(response.data.data);
-          console.log("Project fetched successfully:", response.data.data);
         } else {
           console.error(
             "Failed to fetch project:",
@@ -45,7 +45,6 @@ const ProjectDetail = () => {
     const fetchProjectName = async () => {
       const url = `/api/project/get-project/${id}`;
       const response = await getApi(url);
-      console.log("this is my project name ", response.data.data.projectName);
       setProjectName(response.data.data.projectName);
     };
 
@@ -162,7 +161,7 @@ const ProjectDetail = () => {
       case "resource":
         return <Resource />;
       case "timesheet":
-        return <Timesheet />;
+        return <TimesheetTab />;
       default:
         return null;
     }
@@ -196,7 +195,7 @@ const ProjectDetail = () => {
         </ul>
       </div>
 
-      <div className="space-y-8 py-5">{renderContent()}</div>
+      <div className="space-y-8 py-2">{renderContent()}</div>
     </div>
   );
 };

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { getApi, postApi } from "../../../Utils/API.js";
-import { Toast } from "../../../Components/Toast.jsx";
+import { getApi, postApi } from "../../../../Utils/API.js";
+import { Toast } from "../../../../Components/Toast.jsx";
 import { toast } from "react-toastify";
 
 const CreateTimesheet = ({ resourceName, setCreateTimesheetModal }) => {
