@@ -8,7 +8,7 @@ import { getApi } from "../../../../Utils/API.js";
 import SubTask from "./SubTask.jsx";
 import Pagination from "../../../../Components/Pagination.jsx";
 import { IoMdAddCircleOutline } from "react-icons/io";
-
+import { PlanHeader1 } from "../../../../Components/TableHeaders.jsx";
 const Plan = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -79,16 +79,6 @@ const Plan = () => {
     }
   };
 
-  const tableHeaders = [
-    "Epic Name",
-    "Feature",
-    "Priority",
-    "Project Stage",
-    "Start Date",
-    "Due Date",
-    "Estimated Time",
-  ];
-
   const handleSort = (field) => {
     const order = sortField === field && sortOrder === "asc" ? "desc" : "asc";
     setSortField(field);
@@ -111,6 +101,12 @@ const Plan = () => {
   const filteredPlan = sortedPlan.filter((item) =>
     item.epicName.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const convertMinutesToHours = (minutes) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return `${hours}:${mins < 10 ? "0" : ""}${mins}`;
+  };
 
   return (
     <>
@@ -135,7 +131,7 @@ const Plan = () => {
               <span className="text-white">
                 <NoteAddIcon />
               </span>
-              <span className="hidden lg:block">Add Resource</span>
+              <span className="hidden lg:block">Add Epic</span>
             </button>
           </div>
         </div>
@@ -144,34 +140,7 @@ const Plan = () => {
           <div className="relative mt-5  shadow-md  sm:rounded-lg">
             <div className="overflow-y-auto h-96 bg-gray-100">
               <table className="w-full overflow-y-auto  text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                <thead className="text-base text-black bg-gray-50 dark:text-gray-400">
-                  <tr>
-                    {tableHeaders.map((header, index) => (
-                      <th
-                        scope="col"
-                        className="px-6 py-3"
-                        key={index}
-                        onClick={() =>
-                          handleSort(header.toLowerCase().replace(" ", ""))
-                        }
-                      >
-                        <div className="flex items-center text-black">
-                          {header}
-                          {sortField ===
-                            header.toLowerCase().replace(" ", "") &&
-                            (sortOrder === "asc" ? " 🔼" : " 🔽")}
-                        </div>
-                      </th>
-                    ))}
-                    <th scope="col" className="px-6 py-3">
-                      Actions
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                      More
-                    </th>
-                  </tr>
-                </thead>
-
+                <PlanHeader1 />
                 <tbody>
                   {filteredPlan.length === 0 ? (
                     <tr>
@@ -189,9 +158,9 @@ const Plan = () => {
                         <React.Fragment key={index}>
                           <tr className="bg-gray-300 text-gray-800 border-b">
                             <td className="px-6 py-4">{item.epicName}</td>
-                            <td className="px-6 py-4">{item.featureName}</td>
+
                             <td className="px-6 py-4">{item.priority}</td>
-                            <td className="px-6 py-4">{item.projectStage}</td>
+
                             <td className="px-6 py-4">
                               {new Date(item.startDate).toLocaleDateString()}
                             </td>
@@ -199,7 +168,13 @@ const Plan = () => {
                               {new Date(item.dueDate).toLocaleDateString()}
                             </td>
 
-                            <td className="px-6 py-4">{item.estimatedTime}</td>
+                            <td className="px-6 py-4">
+                              {convertMinutesToHours(item.estimatedTime)}
+                            </td>
+                            <td className="px-6 py-4">
+                              {convertMinutesToHours(item.totalTime)}
+                            </td>
+
                             <td className="px-6 py-4">
                               <IoMdAddCircleOutline
                                 onClick={() => {
@@ -209,6 +184,7 @@ const Plan = () => {
                                 size={24}
                               />
                             </td>
+                          
                             <td className="px-6 py-4">
                               <FaSortDown
                                 size={25}
@@ -217,7 +193,11 @@ const Plan = () => {
                                 }
                               />
                             </td>
+                            
+
+
                           </tr>
+
 
                           {expandedRows.includes(index) && (
                             <tr className="">
@@ -240,19 +220,26 @@ const Plan = () => {
 
                                     <tbody>
                                       {subTasksByPlanId[index]?.length === 0 ? (
-                                        <div>No Subtask to Show</div>
+                                        <tr>
+                                          <td
+                                            colSpan="3"
+                                            className="text-center"
+                                          >
+                                            No Subtask to Show
+                                          </td>
+                                        </tr>
                                       ) : (
                                         subTasksByPlanId[index]?.map(
                                           ({ name, hours, type }, subIndex) => (
                                             <tr
                                               key={subIndex}
-                                              className="bg-white border-b  "
+                                              className="bg-white border-b"
                                             >
                                               <td className="px-6 py-2">
                                                 {name}
                                               </td>
                                               <td className="px-6 py-2">
-                                                {hours}
+                                                {convertMinutesToHours(hours)}
                                               </td>
                                               <td className="px-6 py-2">
                                                 {type}

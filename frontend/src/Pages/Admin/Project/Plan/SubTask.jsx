@@ -4,6 +4,7 @@ import CloseSvg from "../../../../Components/CloseSvg";
 import { postApi } from "../../../../Utils/API";
 import { Toast } from "../../../../Components/Toast";
 import { toast } from "react-toastify";
+
 const SubTask = ({ setSubTask, planName }) => {
   const {
     register,
@@ -15,11 +16,11 @@ const SubTask = ({ setSubTask, planName }) => {
     const url = `/api/project/create-subtask/${planName}`;
     try {
       const response = await postApi(data, url);
-      console.log(response);
       if (response && response.data && response.data.success) {
         toast.success("Subtask Added Successfully!!");
         setTimeout(() => {
           setSubTask(false);
+          window.location.reload();
         }, 1000);
       }
     } catch (error) {
@@ -39,7 +40,7 @@ const SubTask = ({ setSubTask, planName }) => {
         <div className="bg-white rounded-lg shadow-lg p-4 md:p-5 w-full max-w-md max-h-full">
           <div className="flex items-center justify-between border-b pb-4">
             <h3 className="text-xl font-semibold text-gray-900">
-              Add SubTask
+              Add Feature
               <hr />
               {planName}
             </h3>
@@ -79,15 +80,18 @@ const SubTask = ({ setSubTask, planName }) => {
                   htmlFor="hours"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Hours:
+                  Hours (hr:mi):
                 </label>
                 <input
-                  type="number"
+                  type="text"
                   id="hours"
                   {...register("hours", {
                     required: "Hours is required",
-                    min: { value: 1, message: "Minimum value is 1" },
-                    max: { value: 12, message: "Maximum value is 12" },
+                    validate: {
+                      validFormat: (value) =>
+                        /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(value) ||
+                        "Invalid time format. Use hr:mi format (e.g., 02:50)",
+                    },
                   })}
                   className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"
                 />
@@ -111,8 +115,11 @@ const SubTask = ({ setSubTask, planName }) => {
                   className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"
                 >
                   <option value="">Select Type</option>
-                  <option value="Development">Development</option>
-                  <option value="Testing">Testing</option>
+                  <option value="UI/UX">UI/UX</option>
+                  <option value="Frontend Web">Frontend Web</option>
+                  <option value="API/Backend">API/Backend</option>
+                  <option value="QA">QA</option>
+                  <option value="Frontend Mobile">Frontend Mobile</option>
                   <option value="Design">Design</option>
                 </select>
                 {errors.type && (

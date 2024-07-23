@@ -102,7 +102,9 @@ const CreateTimesheet = ({ resourceName, setCreateTimesheetModal }) => {
       setTimeout(() => {
         reset();
         setCreateTimesheetModal(false);
-      }, 500);
+      }, 1000);
+
+      window.location.reload();
     } catch (error) {
       console.error("Error creating timesheet", error);
     }
@@ -162,6 +164,7 @@ const CreateTimesheet = ({ resourceName, setCreateTimesheetModal }) => {
                   defaultValue={projectName}
                 />
               </div>
+              
 
               <div>
                 <label
@@ -246,50 +249,31 @@ const CreateTimesheet = ({ resourceName, setCreateTimesheetModal }) => {
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label
-                    htmlFor="startTime"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Start Time:
-                  </label>
-                  <input
-                    type="time"
-                    id="startTime"
-                    {...register("startTime", {
-                      required: "Start time is required",
-                    })}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  />
-                  {errors.startTime && (
-                    <span className="text-red-500 text-sm">
-                      {errors.startTime.message}
-                    </span>
-                  )}
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="endTime"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    End Time:
-                  </label>
-                  <input
-                    type="time"
-                    id="endTime"
-                    {...register("endTime", {
-                      required: "End time is required",
-                    })}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  />
-                  {errors.endTime && (
-                    <span className="text-red-500 text-sm">
-                      {errors.endTime.message}
-                    </span>
-                  )}
-                </div>
+              <div>
+                <label
+                  htmlFor="dailyHours"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Hours (hr:mi):
+                </label>
+                <input
+                  type="text"
+                  id="totalTime"
+                  {...register("totalTime", {
+                    required: "Hours is required",
+                    validate: {
+                      validFormat: (value) =>
+                        /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(value) ||
+                        "Invalid time format. Use hr:mi format (e.g., 02:50)",
+                    },
+                  })}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                />
+                {errors.totalTime && (
+                  <span className="text-red-500 text-sm">
+                    {errors.totalTime.message}
+                  </span>
+                )}
               </div>
 
               <div className="flex">

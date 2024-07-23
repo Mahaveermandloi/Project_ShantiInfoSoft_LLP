@@ -39,11 +39,15 @@ const AddEmployee = ({ closeModal }) => {
   };
 
   const jobRoles = [
-    "UI developer",
-    "UX developer",
+    "UI/UX developer",
     "Backend developer",
     "Frontend developer",
-    "Software Engineer",
+    "Frontend developer (Mobile)",
+    "Business Analyst",
+    "Quality Analyst",
+    "Project Manager",
+    "Human Resource",
+    "Marketing",
   ];
 
   return (

@@ -8,6 +8,7 @@ import { FaEllipsisH } from "react-icons/fa";
 import AddResource from "./AddResource.jsx";
 import CreateTimesheet from "./CreateTimesheet.jsx";
 import { IoMdAddCircleOutline } from "react-icons/io";
+import { ResourceHeader1 } from "../../../../Components/TableHeaders.jsx";
 
 const Resource = () => {
   const { id } = useParams();
@@ -70,19 +71,11 @@ const Resource = () => {
     resource.resourceName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const tableHeaders = [
-    "Name",
-    "Working Start Date",
-    "Department",
-    "Daily Working Type",
-  ];
-
   return (
     <>
       <div>
         <div className="flex lg:justify-end">
           <div className="flex space-x-5">
-            
             <div className="flex">
               <input
                 type="text"
@@ -103,7 +96,6 @@ const Resource = () => {
               </span>
               <span className="hidden lg:block">Add Resource</span>
             </button>
-            
           </div>
         </div>
 
@@ -111,21 +103,7 @@ const Resource = () => {
           <div className="relative mt-5 overflow-x-auto shadow-md sm:rounded-lg">
             {/* TABLE */}
             <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-              <thead className="text-base text-black bg-gray-50 dark:text-gray-400">
-                <tr>
-                  {tableHeaders.map((header, index) => (
-                    <th scope="col" className="px-6 py-3" key={index}>
-                      <div className="flex items-center text-black">
-                        {header}
-                      </div>
-                    </th>
-                  ))}
-                  <th scope="col" className="px-6 py-3">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-
+              <ResourceHeader1 />
               <tbody>
                 {loading ? (
                   <tr>
@@ -156,14 +134,14 @@ const Resource = () => {
                           ).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4 text-gray-900 whitespace-nowrap">
-                          Department Name
+                          {resource.department}
                         </td>
                         <td className="px-6 py-4 text-gray-900 whitespace-nowrap">
                           {resource.dailyWorkingType}
                         </td>
                         <td className="px-6 py-4 cursor-pointer">
-                          <IoMdAddCircleOutline 
-                          size={23}
+                          <IoMdAddCircleOutline
+                            size={23}
                             onClick={() => {
                               setCreateTimesheetModal(true);
                               setResourceName(resource.resourceName);

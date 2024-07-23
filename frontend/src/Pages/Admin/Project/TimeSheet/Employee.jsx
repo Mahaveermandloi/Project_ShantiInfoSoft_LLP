@@ -28,10 +28,12 @@ const Employee = ({ startDate, endDate }) => {
     const fetchData = async () => {
       try {
         const url = `/api/timesheet/get-all-timesheets/${id}`;
+
         const response = await getApi(url);
+        
         if (response.data.statusCode === 200) {
           const data = response.data.data;
-
+        
           const filteredData = data.filter((item) => {
             const itemDate = new Date(item.date);
             const start = new Date(startDate);
@@ -131,8 +133,7 @@ const Employee = ({ startDate, endDate }) => {
 
   const calculateTotalTime = (group) => {
     const totalMinutes = group.data.reduce((total, item) => {
-      const [hours, minutes] = item.totalTime.split(":").map(Number);
-      return total + hours * 60 + minutes;
+      return total + Number(item.totalTime);
     }, 0);
 
     const hours = Math.floor(totalMinutes / 60);
@@ -145,21 +146,14 @@ const Employee = ({ startDate, endDate }) => {
     currentPage * itemsPerPage
   );
 
-  const heading = [
-    "Sprint Name",
-    "Sub Task",
-    "Date",
-    "Start time",
-    "End time",
-    "Hours",
-  ];
+  const heading = ["Sprint Name", "Sub Task", "Date", "Hours"];
 
   const totalPages = Math.ceil(groupedData.length / itemsPerPage);
 
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
-
-  const formatTotalTime = (totalTime) => {
-    const [hours, minutes] = totalTime.split(":").map(Number);
+  const formatTotalTime = (totalMinutes) => {
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
     return `${hours}:${minutes < 10 ? "0" : ""}${minutes}`;
   };
 
@@ -219,7 +213,6 @@ const Employee = ({ startDate, endDate }) => {
                   </td>
                 </tr>
               ) : (
-               
                 paginatedData.map((group, index) => (
                   <React.Fragment key={index}>
                     <>
@@ -357,13 +350,6 @@ const Employee = ({ startDate, endDate }) => {
                                         </td>
 
                                         <td className="px-6 py-4">
-                                          {item.startTime}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                          {item.endTime}
-                                        </td>
-
-                                        <td className="px-6 py-4">
                                           {formatTotalTime(item.totalTime)}
                                         </td>
                                       </tr>
@@ -379,8 +365,6 @@ const Employee = ({ startDate, endDate }) => {
                   </React.Fragment>
                 ))
               )}
-
-              
             </tbody>
           </table>
         </div>

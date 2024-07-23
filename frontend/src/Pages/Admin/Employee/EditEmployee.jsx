@@ -72,11 +72,15 @@ const EditEmployee = ({ closeModal, employeeId }) => {
   };
 
   const jobRoles = [
-    "UI developer",
-    "UX developer",
+    "UI/UX developer",
     "Backend developer",
     "Frontend developer",
-    "Software Engineer",
+    "Frontend developer (Mobile)",
+    "Quality Analyst",
+    "Business Analyst",
+    "Human Resource",
+    "Project Manager",
+    "Marketing"
   ];
 
   return (

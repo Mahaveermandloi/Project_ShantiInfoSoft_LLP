@@ -1,36 +1,36 @@
 import React, { useState, useEffect } from "react";
-import { Svg } from "../../../../Components/Svg.jsx";
 import { useParams } from "react-router-dom";
+import { getApi2, getApi } from "../../../../Utils/API.js";
 import Pagination from "../../../../Components/Pagination.jsx";
-import { getApi } from "../../../../Utils/API.js";
+import { FaSortDown } from "react-icons/fa";
 import {
   SprintContentHeader1,
   SprintContentHeader2,
+  SprintContentHeader3,
+  sprintTableHeaders,
 } from "../../../../Components/TableHeaders.jsx";
 
-const SprintContent = ({ startDate, endDate }) => {
+const SprintContent = () => {
   const { id } = useParams();
   const [groupedData, setGroupedData] = useState({});
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [expandedRows, setExpandedRows] = useState([]);
+  const [departmentData, setDepartmentData] = useState({}); // State to store expanded data
   const itemsPerPage = 5;
+
+  const [sprint, setSprints] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const url = `/api/timesheet/get-all-timesheets/${id}`;
         const response = await getApi(url);
+
         if (response.data.statusCode === 200) {
           const data = response.data.data;
 
-          const filteredData = data.filter((item) => {
-            const itemDate = new Date(item.date);
-            const start = new Date(startDate);
-            const end = new Date(endDate);
-            return itemDate >= start && itemDate <= end;
-          });
-
-          const groupedBySprint = filteredData.reduce((acc, item) => {
+          const groupedBySprint = data.reduce((acc, item) => {
             const sprintName = item.sprintName;
             if (!acc[sprintName]) {
               acc[sprintName] = {
@@ -68,7 +68,7 @@ const SprintContent = ({ startDate, endDate }) => {
     };
 
     fetchData();
-  }, [id, startDate, endDate]);
+  }, [id]);
 
   useEffect(() => {
     const fetchSprints = async () => {
@@ -99,6 +99,51 @@ const SprintContent = ({ startDate, endDate }) => {
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
     return `${hours}:${minutes < 10 ? "0" : ""}${minutes}`;
+  };
+
+  const minutesToHourMinuteString = (totalMinutes) => {
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return `${hours}:${minutes < 10 ? "0" : ""}${minutes}`;
+  };
+
+  const toggleRowExpansion = async (jobRole, sprintName) => {
+    const rowKey = `${sprintName}-${jobRole}`;
+    if (!expandedRows.includes(rowKey)) {
+      try {
+        const data = { department: jobRole, sprintName };
+        const route = `/api/timesheet/get-timesheet-by-department`;
+        const response = await getApi2(data, route);
+
+        const totalHours = response.data.reduce((total, resource) => {
+          // Ensure totalHours is a string in "hh:mm" format
+          const formattedTotalHours =
+            typeof resource.totalHours === "string"
+              ? resource.totalHours
+              : "0:00"; // Default to "0:00" if not in expected format
+
+          const [hours, minutes] = formattedTotalHours.split(":").map(Number);
+          return total + hours * 60 + minutes;
+        }, 0);
+
+        setDepartmentData((prev) => ({
+          ...prev,
+          [rowKey]: {
+            department: jobRole,
+            totalHours: minutesToHourMinuteString(totalHours),
+            resources: response.data,
+          },
+        }));
+      } catch (error) {
+        console.error("Error fetching expanded data:", error);
+      }
+    }
+
+    setExpandedRows((prev) =>
+      prev.includes(rowKey)
+        ? prev.filter((key) => key !== rowKey)
+        : [...prev, rowKey]
+    );
   };
 
   const totalPages = Math.ceil(Object.keys(groupedData).length / itemsPerPage);
@@ -160,37 +205,100 @@ const SprintContent = ({ startDate, endDate }) => {
                     </tr>
 
                     <tr className="mt-2 mb-4">
-                      <td colSpan="4" className="px-6 bg-white">
-                        <div className="p-2">
+                      <td colSpan="4" className="px-3 bg-white">
+                        <div className="py-2">
                           <table className="w-full text-sm text-left text-gray-500">
-                            <SprintContentHeader2 />
-
+                            <SprintContentHeader3 />
                             <tbody>
-                              {Object.keys(
-                                groupedData[sprintName].resources
-                              ).map((resourceName) => (
-                                <tr
-                                  className="bg-white border-b dark:bg-gray-100 dark:border-gray-700"
-                                  key={resourceName}
-                                >
-                                  <td className="px-6 py-4">{resourceName}</td>
-                                  <td className="px-6 py-4">
-                                    {new Date(
-                                      groupedData[sprintName].resources[
-                                        resourceName
-                                      ][0].date
-                                    ).toLocaleDateString()}
-                                  </td>
-
-                                  <td className="px-6 py-4">
-                                    {calculateTotalTime(
-                                      groupedData[sprintName].resources[
-                                        resourceName
-                                      ]
+                              {sprintTableHeaders &&
+                                sprintTableHeaders.map((item) => (
+                                  <React.Fragment key={item}>
+                                    <tr className=" border-b dark:bg-gray-100 dark:border-gray-700">
+                                      <td className="px-6 py-4">{item}</td>
+                                      <td className="px-6 py-4">
+                                        {departmentData[`${sprintName}-${item}`]
+                                          ?.totalHours > 600 ? (
+                                          <span className="text-red-500">
+                                            {
+                                              departmentData[
+                                                `${sprintName}-${item}`
+                                              ]?.totalHours
+                                            }
+                                          </span>
+                                        ) : departmentData[
+                                            `${sprintName}-${item}`
+                                          ]?.totalHours > 570 ? (
+                                          <span className="text-green-500">
+                                            {
+                                              departmentData[
+                                                `${sprintName}-${item}`
+                                              ]?.totalHours
+                                            }
+                                          </span>
+                                        ) : (
+                                          <span className="text-yellow-500">
+                                            {
+                                              departmentData[
+                                                `${sprintName}-${item}`
+                                              ]?.totalHours
+                                            }
+                                          </span>
+                                        )}
+                                      </td>
+                                      <td className="px-6 py-4">
+                                        <FaSortDown
+                                          size={25}
+                                          onClick={() =>
+                                            toggleRowExpansion(item, sprintName)
+                                          }
+                                        />
+                                      </td>
+                                    </tr>
+                                    {expandedRows.includes(
+                                      `${sprintName}-${item}`
+                                    ) && (
+                                      <tr className="">
+                                        <td colSpan="3" className="px-6 py-4">
+                                          <div className="p-2">
+                                            <table className="w-full text-sm text-left text-gray-500">
+                                              <thead className="bg-gray-200">
+                                                <tr>
+                                                  <th className="px-6 py-2">
+                                                    Resource Name
+                                                  </th>
+                                                  <th className="px-6 py-2">
+                                                    Hours
+                                                  </th>
+                                                </tr>
+                                              </thead>
+                                              <tbody>
+                                                {departmentData[
+                                                  `${sprintName}-${item}`
+                                                ]?.resources.map(
+                                                  (resource, index) => (
+                                                    <tr
+                                                      className="bg-white border-b dark:bg-gray-100 dark:border-gray-700"
+                                                      key={index}
+                                                    >
+                                                      <td className="px-6 py-4">
+                                                        {resource.resourceName}
+                                                      </td>
+                                                      <td className="px-6 py-4">
+                                                        {minutesToHourMinuteString(
+                                                          resource.totalHours
+                                                        )}
+                                                      </td>
+                                                    </tr>
+                                                  )
+                                                )}
+                                              </tbody>
+                                            </table>
+                                          </div>
+                                        </td>
+                                      </tr>
                                     )}
-                                  </td>
-                                </tr>
-                              ))}
+                                  </React.Fragment>
+                                ))}
                             </tbody>
                           </table>
                         </div>
@@ -215,3 +323,11 @@ const SprintContent = ({ startDate, endDate }) => {
 };
 
 export default SprintContent;
+
+
+
+
+
+
+
+
