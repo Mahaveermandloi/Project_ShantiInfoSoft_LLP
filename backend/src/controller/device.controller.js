@@ -149,7 +149,7 @@ const editDevice = asyncHandler(async (req, res, next) => {
 const assignDevice = asyncHandler(async (req, res) => {
   const deviceId = req.params.id;
   const { Name } = req.body;
-  console.log(Name, deviceId);
+
   let device = await Device.findById(deviceId);
 
   if (!device) {
@@ -178,7 +178,7 @@ const assignDevice = asyncHandler(async (req, res) => {
 const makeDeviceAvailable = asyncHandler(async (req, res) => {
   const deviceId = req.params.id;
 
-  console.log(deviceId);
+ 
   let device = await Device.findById(deviceId);
 
   if (!device) {

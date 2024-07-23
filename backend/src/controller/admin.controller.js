@@ -189,8 +189,7 @@ const logoutAdmin = asyncHandler(async (req, res) => {
     }
   }
 
-  console.log(`Entity ${entityId} logged out successfully`);
-
+  
   const options = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",

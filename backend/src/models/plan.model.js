@@ -45,9 +45,21 @@ const planSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  totalTime: {
+    type: Number,
+    default: "",
+  },
   taskDocuments: {
     type: String, // Assuming a single document URL for simplicity
   },
+});
+
+planSchema.path("estimatedTime").set(function (value) {
+  if (typeof value === "string") {
+    const [hours, minutes] = value.split(":").map(Number);
+    return hours * 60 + minutes;
+  }
+  return value;
 });
 
 const Plan = mongoose.model("Plan", planSchema);

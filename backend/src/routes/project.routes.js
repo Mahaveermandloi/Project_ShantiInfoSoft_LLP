@@ -24,7 +24,11 @@ import {
   deleteProject,
 } from "../controller/project.controller.js";
 import { verifyJWT } from "../middleware/auth.middleware.js";
-import { CreateTimesheet, getAllTimesheets } from "../controller/timesheet.controller.js";
+import {
+  CreateTimesheet,
+  getAllTimesheets,
+  getTimesheetByDepartment,
+} from "../controller/timesheet.controller.js";
 const router = Router();
 
 router.get("/get-projects", verifyJWT, getProjects);
@@ -78,6 +82,12 @@ router.get("/get-subtask-by-name/:name", getSubTasksByName);
 // ----------------------------------------------------------------------------
 router.post("/create-timesheet", projectUpload.any(), CreateTimesheet);
 
-router.get("/get-all-timesheets/:projectId",getAllTimesheets )
+router.get("/get-all-timesheets/:projectId", getAllTimesheets);
+
+router.get(
+  "/get-timesheet-by-department",
+  projectUpload.any(),
+  getTimesheetByDepartment
+);
 
 export default router;

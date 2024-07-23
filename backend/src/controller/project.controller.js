@@ -46,7 +46,7 @@ const createProject = asyncHandler(async (req, res, next) => {
 
   const doc = req.file;
 
-  console.log(doc);
+ 
   if (!req.file) {
     return res.status(400).json({ message: "Attachment is required" });
   }

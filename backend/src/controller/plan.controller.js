@@ -4,6 +4,11 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import Plan from "../models/plan.model.js";
 import Subtask from "../models/subtask.model.js";
 
+const convertHoursToMinutes = (time) => {
+  const [hours, minutes] = time.split(":").map(Number);
+  return hours * 60 + minutes;
+};
+
 // Create a new plan
 const createPlan = asyncHandler(async (req, res) => {
   const {
@@ -18,8 +23,7 @@ const createPlan = asyncHandler(async (req, res) => {
   } = req.body;
 
   const { id } = req.params;
-  console.log("Received data:", req.body);
-  console.log("Received file:", req.file);
+
 
   if (!req.file) {
     throw new ApiError(400, "Task documents (file) are required");
@@ -71,47 +75,47 @@ const getAllPlans = asyncHandler(async (req, res) => {
   res.status(200).json(response);
 });
 
-const createSubTask = asyncHandler(async (req, res) => {
-  const { name, hours, type } = req.body;
-  const { planName } = req.params;
-  console.log(name, hours, type, planName);
-  try {
-    const existingSubtask = await Subtask.findOne({ name });
-    if (existingSubtask) {
-      return res.status(400).json({
-        success: false,
-        message: "Subtask with this name already exists",
-      });
-    }
-    const subtask = await Subtask.create({
-      name,
-      hours,
-      type,
-      planName,
-    });
-    const response = new ApiResponse(
-      200,
-      { subtask },
-      "Subtasks fetched successfully"
-    );
-    // console.log(response);
-    res.status(200).json(response);
-  } catch (error) {
-    res.status(500).json({
-      message: "Failed to fetched Subtask",
-    });
-  }
-});
+// const createSubTask = asyncHandler(async (req, res) => {
+//   const { name, hours, type } = req.body;
+//   const { planName } = req.params;
+// 
+//   try {
+//     const existingSubtask = await Subtask.findOne({ name });
+//     if (existingSubtask) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Subtask with this name already exists",
+//       });
+//     }
+//     const subtask = await Subtask.create({
+//       name,
+//       hours,
+//       type,
+//       planName,
+//     });
+//     const response = new ApiResponse(
+//       200,
+//       { subtask },
+//       "Subtasks fetched successfully"
+//     );
+//    
+//     res.status(200).json(response);
+//   } catch (error) {
+//     res.status(500).json({
+//       message: "Failed to fetched Subtask",
+//     });
+//   }
+// });
 
 // const getSubTasksByPlanId = asyncHandler(async (req, res) => {
 //   const { planId } = req.params;
 
-//   console.log(planId);
+//   
 
 //   try {
 //     const subtasks = await Subtask.find({ planId });
 
-//     console.log(subtasks);
+//
 
 //     if (!subtasks || subtasks.length === 0) {
 //       return res.status(404).json({
@@ -132,15 +136,67 @@ const createSubTask = asyncHandler(async (req, res) => {
 //   }
 // });
 
+const createSubTask = asyncHandler(async (req, res) => {
+  const { name, hours, type } = req.body;
+  const { planName } = req.params;
+
+  try {
+    // Check if the subtask with the same name already exists
+    const existingSubtask = await Subtask.findOne({ name });
+    if (existingSubtask) {
+      return res.status(400).json({
+        success: false,
+        message: "Subtask with this name already exists",
+      });
+    }
+
+    // Create the new subtask
+    const subtask = await Subtask.create({
+      name,
+      hours,
+      type,
+      planName,
+    });
+
+    // Convert subtask hours to minutes
+    const subtaskMinutes = convertHoursToMinutes(hours);
+
+    // Find the corresponding plan and update its totalTime
+    const plan = await Plan.findOne({ epicName: planName });
+    if (!plan) {
+      return res.status(404).json({
+        success: false,
+        message: "Plan not found",
+      });
+    }
+
+    plan.totalTime += subtaskMinutes;
+    await plan.save();
+
+    // Create a response object
+    const response = new ApiResponse(
+      200,
+      { subtask },
+      "Subtask created and plan updated successfully"
+    );
+
+    res.status(200).json(response);
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to create subtask",
+    });
+  }
+});
+
 const getSubTasksByName = asyncHandler(async (req, res) => {
   const { name } = req.params;
 
-  console.log(name);
+
 
   try {
-    const subtasks = await Subtask.find({ planName : name });
+    const subtasks = await Subtask.find({ planName: name });
 
-    console.log(subtasks);
+   
 
     if (!subtasks || subtasks.length === 0) {
       return res.status(404).json({
@@ -160,8 +216,6 @@ const getSubTasksByName = asyncHandler(async (req, res) => {
     });
   }
 });
-
-
 
 export {
   createPlan,

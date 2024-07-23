@@ -23,13 +23,19 @@ const resourceSchema = new mongoose.Schema({
   dailyHours: {
     type: Number,
     required: true,
-    min: [0, "Daily hours must be at least 0"],
-    max: [24, "Daily hours cannot exceed 24"],
-    validate: {
-      validator: Number.isInteger,
-      message: "{VALUE} is not an integer value",
-    },
   },
+  department: {
+    type: String,
+    required: true,
+  },
+});
+
+resourceSchema.path("dailyHours").set(function (value) {
+  if (typeof value === "string") {
+    const [hours, minutes] = value.split(":").map(Number);
+    return hours * 60 + minutes;
+  }
+  return value;
 });
 
 const Resource = mongoose.model("Resource", resourceSchema);
